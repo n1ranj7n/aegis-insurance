@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% load insurance_extras %}
+{% block title %}{{ holder.name }} · Aegis{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>{{ holder.name }}</h1>
+    <div class="sub"><a href="{% url 'policyholder_list' %}">Policyholders</a> / {{ holder.name }}</div>
+  </div>
+  <a href="{% url 'policy_create' %}" class="btn btn-ghost">+ New policy</a>
+</div>
+
+<div class="grid-2-1">
+  <div class="card card-pad">
+    <p class="card-title">Policies ({{ policies|length }})</p>
+    {% if policies %}
+    <table class="data">
+      <thead><tr><th>Policy</th><th>Plan</th><th class="num">Sum insured</th><th class="num">Premium</th><th class="num">NCB</th><th>Status</th></tr></thead>
+      <tbody>
+        {% for p in policies %}
+        <tr>
+          <td><a href="{% url 'policy_detail' p.pk %}">{{ p.policy_number }}</a></td>
+          <td>{{ p.get_plan_type_display }}</td>
+          <td class="num">{{ p.sum_insured|inr_compact }}</td>
+          <td class="num">{{ p.current_premium|inr }}</td>
+          <td class="num">{{ p.no_claim_streak }}×</td>
+          <td><span class="badge {{ p.status|policy_badge }}">{{ p.get_status_display }}</span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}<div class="empty">No policies for this customer.</div>{% endif %}
+  </div>
+
+  <div class="card card-pad">
+    <p class="card-title">Customer details</p>
+    <dl class="dl">
+      <dt>Email</dt><dd>{{ holder.email }}</dd>
+      <dt>Phone</dt><dd>{{ holder.phone }}</dd>
+      <dt>Gender</dt><dd>{{ holder.get_gender_display }}</dd>
+      <dt>Date of birth</dt><dd>{{ holder.date_of_birth|date:"d M Y" }} ({{ holder.age }} yrs)</dd>
+      <dt>Address</dt><dd>{{ holder.address|default:"—" }}</dd>
+      <dt>Registered</dt><dd>{{ holder.created_at|date:"d M Y" }}</dd>
+    </dl>
+  </div>
+</div>
+{% endblock %}

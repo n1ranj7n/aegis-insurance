@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+{% load insurance_extras %}
+{% block title %}{{ policy.policy_number }} · Aegis{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>{{ policy.policy_number }}</h1>
+    <div class="sub">
+      <a href="{% url 'policy_list' %}">Policies</a> /
+      <a href="{% url 'policyholder_detail' policy.policyholder.pk %}">{{ policy.policyholder.name }}</a>
+    </div>
+  </div>
+  <div class="btn-row">
+    <a href="{% url 'claim_create' %}?policy={{ policy.pk }}" class="btn btn-ghost">+ Record claim</a>
+    <form method="post" action="{% url 'policy_run_renewal' policy.pk %}" style="margin:0"
+          onsubmit="return confirm('Simulate advancing this policy to its next renewal? This recalculates the premium and writes a history row.');">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-blue">Run renewal</button>
+    </form>
+  </div>
+</div>
+
+<div class="kpi-grid">
+  <div class="kpi k-blue">
+    <div class="label">Sum insured</div>
+    <div class="value">{{ policy.sum_insured|inr_compact }}</div>
+    <div class="hint">{{ policy.get_plan_type_display }}</div>
+  </div>
+  <div class="kpi">
+    <div class="label">Base premium</div>
+    <div class="value">{{ policy.base_premium|inr }}</div>
+    <div class="hint">before NCB</div>
+  </div>
+  <div class="kpi k-green">
+    <div class="label">Current premium</div>
+    <div class="value">{{ policy.current_premium|inr }}</div>
+    <div class="hint">saving {{ policy.annual_savings|inr }}/yr</div>
+  </div>
+  <div class="kpi k-amber">
+    <div class="label">No-Claim-Bonus</div>
+    <div class="value">{{ policy.no_claim_streak }}× → {{ policy.discount_pct_applied }}%</div>
+    <div class="hint">consecutive claim-free periods</div>
+  </div>
+</div>
+
+<div class="grid-2-1">
+  <div style="display:flex; flex-direction:column; gap:16px;">
+    <div class="card card-pad">
+      <p class="card-title">Premium history (append-only audit)</p>
+      {% if history %}
+      <table class="data">
+        <thead><tr><th>Effective</th><th class="num">From</th><th class="num">To</th><th class="num">Discount</th><th>Reason</th></tr></thead>
+        <tbody>
+          {% for h in history %}
+          <tr>
+            <td>{{ h.effective_date|date:"d M Y" }}</td>
+            <td class="num">{{ h.previous_premium|inr }}</td>
+            <td class="num"><strong>{{ h.new_premium|inr }}</strong></td>
+            <td class="num"><span class="badge {% if h.discount_pct_applied %}green{% else %}grey{% endif %}">{{ h.discount_pct_applied }}%</span></td>
+            <td class="pill-meta">{{ h.reason }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="empty">No recalculations yet. Click <strong>Run renewal</strong> to apply the NCB engine.</div>
+      {% endif %}
+    </div>
+
+    <div class="card card-pad">
+      <p class="card-title">Claims ({{ claims|length }})</p>
+      {% if claims %}
+      <table class="data">
+        <thead><tr><th>Claim</th><th>Type</th><th class="num">Amount</th><th>Service date</th><th>Status</th><th></th></tr></thead>
+        <tbody>
+          {% for c in claims %}
+          <tr>
+            <td>{{ c.claim_number }}</td>
+            <td>{{ c.get_claim_type_display }}</td>
+            <td class="num">{{ c.claim_amount|inr }}</td>
+            <td>{{ c.date_of_service|date:"d M Y" }}</td>
+            <td><span class="badge {{ c.status|claim_badge }}">{{ c.get_status_display }}</span></td>
+            <td class="num"><a href="{% url 'claim_edit' c.pk %}" class="btn btn-ghost btn-sm">Edit</a></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}<div class="empty">No claims on this policy.</div>{% endif %}
+    </div>
+  </div>
+
+  <div class="card card-pad" style="align-self:start">
+    <p class="card-title">Policy details</p>
+    <dl class="dl">
+      <dt>Plan type</dt><dd>{{ policy.get_plan_type_display }}</dd>
+      <dt>Status</dt><dd><span class="badge {{ policy.status|policy_badge }}">{{ policy.get_status_display }}</span></dd>
+      <dt>Start date</dt><dd>{{ policy.start_date|date:"d M Y" }}</dd>
+      <dt>Renewal date</dt><dd>{{ policy.renewal_date|date:"d M Y" }}</dd>
+      <dt>NCB streak</dt><dd>{{ policy.no_claim_streak }} period(s)</dd>
+      <dt>Applied discount</dt><dd>{{ policy.discount_pct_applied }}%</dd>
+    </dl>
+    <div style="margin-top:14px">
+      <div class="pill-meta" style="margin-bottom:5px">NCB progress to 25% cap</div>
+      <div class="progress"><span style="width:{% widthratio policy.discount_pct_applied 25 100 %}%"></span></div>
+    </div>
+  </div>
+</div>
+{% endblock %}

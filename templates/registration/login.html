@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block title %}Sign in · Aegis Health Insurance{% endblock %}
+
+{% block content_anon %}
+<div class="login-wrap">
+  <div class="login-card">
+    <div class="brand">
+      <span class="mark mark-lg">{% include '_owl.html' %}</span>
+      <span>Aegis</span>
+    </div>
+    <h1>Health Insurance Console</h1>
+    <p class="tagline">Sign in to manage policyholders, policies &amp; claims.</p>
+
+    <div class="demo-creds">
+      <div><strong>Demo login</strong></div>
+      username <code>{{ DEMO_USERNAME }}</code> &nbsp; password <code>{{ DEMO_PASSWORD }}</code>
+    </div>
+
+    {% if form.errors %}
+      <div class="msg error" style="margin-bottom:16px">
+        Incorrect username or password. Try the demo credentials above.
+      </div>
+    {% endif %}
+
+    <form method="post" action="{% url 'login' %}">
+      {% csrf_token %}
+      <div class="form-field">
+        <label for="id_username">Username</label>
+        {{ form.username }}
+      </div>
+      <div class="form-field">
+        <label for="id_password">Password</label>
+        {{ form.password }}
+      </div>
+      <input type="hidden" name="next" value="{{ next }}">
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center;">Sign in</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

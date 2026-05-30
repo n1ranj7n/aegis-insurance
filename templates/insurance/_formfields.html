@@ -1,0 +1,16 @@
+{# Renders a Django form's fields with Aegis styling. #}
+{% if form.non_field_errors %}
+  <div class="msg error" style="margin-bottom:14px">
+    {% for e in form.non_field_errors %}{{ e }}{% endfor %}
+  </div>
+{% endif %}
+<div class="form-grid">
+  {% for field in form %}
+    <div class="form-field {% if field.name == 'address' or field.name == 'notes' %}full{% endif %}">
+      <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+      {{ field }}
+      {% if field.help_text %}<div class="help">{{ field.help_text }}</div>{% endif %}
+      {% for e in field.errors %}<div class="errors">{{ e }}</div>{% endfor %}
+    </div>
+  {% endfor %}
+</div>

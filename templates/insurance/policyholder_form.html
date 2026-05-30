@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block title %}Add policyholder · Aegis{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Add policyholder</h1>
+    <div class="sub"><a href="{% url 'policyholder_list' %}">Policyholders</a> / New</div>
+  </div>
+</div>
+
+{% if at_capacity %}
+  <div class="msg warning" style="margin-bottom:16px">
+    Demo limit reached ({{ used }}/{{ limit }} policyholders). New records are paused — data resets nightly.
+  </div>
+{% endif %}
+
+<div class="card card-pad" style="max-width:760px">
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {% include 'insurance/_formfields.html' %}
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary" {% if at_capacity %}disabled{% endif %}>Save policyholder</button>
+      <a href="{% url 'policyholder_list' %}" class="btn btn-ghost">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

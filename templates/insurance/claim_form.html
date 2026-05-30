@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block title %}{% if editing %}Edit claim{% else %}Record claim{% endif %} · Aegis{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>{% if editing %}Edit claim {{ claim.claim_number }}{% else %}Record claim{% endif %}</h1>
+    <div class="sub"><a href="{% url 'claim_list' %}">Claims</a> / {% if editing %}Edit{% else %}New{% endif %}</div>
+  </div>
+</div>
+
+{% if at_capacity %}
+  <div class="msg warning" style="margin-bottom:16px">
+    Demo limit reached ({{ used }}/{{ limit }} claims). New records are paused — data resets nightly.
+  </div>
+{% endif %}
+
+<div class="card card-pad" style="max-width:760px">
+  <p class="pill-meta" style="margin-top:0">
+    Approving or settling a claim breaks the policy's No-Claim-Bonus streak at the next renewal.
+  </p>
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {% include 'insurance/_formfields.html' %}
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary" {% if at_capacity and not editing %}disabled{% endif %}>
+        {% if editing %}Save changes{% else %}Record claim{% endif %}
+      </button>
+      <a href="{% url 'claim_list' %}" class="btn btn-ghost">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+{% load insurance_extras %}
+{% block title %}Dashboard · Aegis{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Dashboard</h1>
+    <div class="sub">Portfolio overview &amp; No-Claim-Bonus performance</div>
+  </div>
+  <div class="btn-row">
+    <a href="{% url 'policy_create' %}" class="btn btn-ghost">+ New policy</a>
+    <a href="{% url 'claim_create' %}" class="btn btn-primary">+ Record claim</a>
+  </div>
+</div>
+
+<div class="kpi-grid">
+  <div class="kpi k-blue">
+    <div class="label">Policyholders</div>
+    <div class="value">{{ kpis.total_policyholders }}</div>
+    <div class="hint">registered customers</div>
+  </div>
+  <div class="kpi k-green">
+    <div class="label">Active policies</div>
+    <div class="value">{{ kpis.active_policies }}</div>
+    <div class="hint">currently in force</div>
+  </div>
+  <div class="kpi k-amber">
+    <div class="label">Total claims</div>
+    <div class="value">{{ kpis.total_claims }}</div>
+    <div class="hint">across all statuses</div>
+  </div>
+  <div class="kpi">
+    <div class="label">Premium pool</div>
+    <div class="value">{{ kpis.premium_pool|inr_compact }}</div>
+    <div class="hint">annual, active policies</div>
+  </div>
+  <div class="kpi k-green">
+    <div class="label">Avg NCB discount</div>
+    <div class="value">{{ kpis.avg_discount }}%</div>
+    <div class="hint">applied across portfolio</div>
+  </div>
+</div>
+
+<div class="grid-2" style="margin-bottom:16px">
+  <div class="card card-pad">
+    <p class="card-title">Claims by type</p>
+    <canvas id="claimsByType"></canvas>
+  </div>
+  <div class="card card-pad">
+    <p class="card-title">Premium discount distribution</p>
+    <canvas id="discountDist"></canvas>
+  </div>
+</div>
+
+<div class="grid-2">
+  <div class="card card-pad">
+    <p class="card-title">Recent claims</p>
+    {% if recent_claims %}
+    <table class="data">
+      <thead><tr><th>Claim</th><th>Policyholder</th><th>Type</th><th class="num">Amount</th><th>Status</th></tr></thead>
+      <tbody>
+        {% for c in recent_claims %}
+        <tr>
+          <td><a href="{% url 'policy_detail' c.policy.pk %}">{{ c.claim_number }}</a></td>
+          <td>{{ c.policy.policyholder.name }}</td>
+          <td>{{ c.get_claim_type_display }}</td>
+          <td class="num">{{ c.claim_amount|inr }}</td>
+          <td><span class="badge {{ c.status|claim_badge }}">{{ c.get_status_display }}</span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}<div class="empty">No claims yet.</div>{% endif %}
+  </div>
+
+  <div class="card card-pad">
+    <p class="card-title">Top No-Claim-Bonus streaks</p>
+    {% if top_streaks %}
+    <table class="data">
+      <thead><tr><th>Policy</th><th>Holder</th><th class="num">Streak</th><th class="num">Discount</th></tr></thead>
+      <tbody>
+        {% for p in top_streaks %}
+        <tr>
+          <td><a href="{% url 'policy_detail' p.pk %}">{{ p.policy_number }}</a></td>
+          <td>{{ p.policyholder.name }}</td>
+          <td class="num">{{ p.no_claim_streak }}×</td>
+          <td class="num"><span class="badge {% if p.discount_pct_applied %}green{% else %}grey{% endif %}">{{ p.discount_pct_applied }}%</span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}<div class="empty">No policies yet.</div>{% endif %}
+  </div>
+</div>
+
+{{ claims_by_type|json_script:"claimsData" }}
+{{ discount_distribution|json_script:"discountData" }}
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+  const teal = "#0e7c86", blue = "#1565c0";
+  const claimsData = JSON.parse(document.getElementById("claimsData").textContent);
+  const discountData = JSON.parse(document.getElementById("discountData").textContent);
+
+  new Chart(document.getElementById("claimsByType"), {
+    type: "doughnut",
+    data: {
+      labels: claimsData.labels,
+      datasets: [{
+        data: claimsData.data,
+        backgroundColor: ["#0e7c86", "#1565c0", "#1f9d57", "#b9770b"],
+        borderWidth: 2, borderColor: "#fff"
+      }]
+    },
+    options: { plugins: { legend: { position: "bottom" } }, cutout: "58%" }
+  });
+
+  new Chart(document.getElementById("discountDist"), {
+    type: "bar",
+    data: {
+      labels: discountData.labels,
+      datasets: [{ label: "Policies", data: discountData.data, backgroundColor: blue, borderRadius: 6 }]
+    },
+    options: {
+      plugins: { legend: { display: false } },
+      scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+    }
+  });
+</script>
+{% endblock %}

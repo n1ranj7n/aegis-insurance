@@ -1,0 +1,60 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Aegis Health Insurance{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%230e7c86'/><g fill='none' stroke='%23fff' stroke-width='2.2' stroke-linecap='round'><circle cx='11.8' cy='13.4' r='4.6'/><circle cx='20.2' cy='13.4' r='4.6'/><path d='M6.8 15 C6.8 25.6 25.2 25.6 25.2 15'/></g></svg>">
+  <meta name="theme-color" content="#0e7c86">
+  {% block head_extra %}{% endblock %}
+</head>
+<body>
+  <div class="demo-banner">{{ DEMO_BANNER_TEXT }}</div>
+
+  {% if user.is_authenticated %}
+  <header class="topbar">
+    <a href="{% url 'dashboard' %}" class="brand">
+      <span class="mark">{% include '_owl.html' %}</span>
+      <span>Aegis <small>Health Insurance</small></span>
+    </a>
+    <div class="topbar-right">
+      <span>Signed in as <strong>{{ user.get_username }}</strong></span>
+      <form action="{% url 'logout' %}" method="post" style="margin:0">
+        {% csrf_token %}
+        <button type="submit" class="btn-logout">Sign out</button>
+      </form>
+    </div>
+  </header>
+
+  <div class="shell">
+    <nav class="sidebar">
+      <div class="nav-label">Overview</div>
+      <a href="{% url 'dashboard' %}" class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">Dashboard</a>
+      <div class="nav-label">Records</div>
+      <a href="{% url 'policyholder_list' %}" class="{% if 'policyholder' in request.resolver_match.url_name %}active{% endif %}">Policyholders</a>
+      <a href="{% url 'policy_list' %}" class="{% if request.resolver_match.url_name == 'policy_list' or request.resolver_match.url_name == 'policy_detail' or request.resolver_match.url_name == 'policy_create' %}active{% endif %}">Policies</a>
+      <a href="{% url 'claim_list' %}" class="{% if 'claim' in request.resolver_match.url_name %}active{% endif %}">Claims</a>
+      <div class="nav-label">Admin</div>
+      <a href="{% url 'admin:index' %}">Django Admin</a>
+    </nav>
+
+    <main class="main">
+      {% if messages %}
+      <div class="messages">
+        {% for message in messages %}
+          <div class="msg {{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+      {% endif %}
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+  {% else %}
+    {% block content_anon %}{% endblock %}
+  {% endif %}
+
+  {% block scripts %}{% endblock %}
+</body>
+</html>

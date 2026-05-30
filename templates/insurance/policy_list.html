@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% load insurance_extras %}
+{% block title %}Policies · Aegis{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Policies</h1>
+    <div class="sub">{{ page_obj.paginator.count }} polic{{ page_obj.paginator.count|pluralize:"y,ies" }} on record</div>
+  </div>
+  <a href="{% url 'policy_create' %}" class="btn btn-primary">+ Add policy</a>
+</div>
+
+<div class="card">
+  {% if page_obj %}
+  <table class="data">
+    <thead>
+      <tr>
+        <th>Policy</th><th>Holder</th><th>Plan</th>
+        <th class="num">Sum insured</th><th class="num">Base</th><th class="num">Current</th>
+        <th class="num">NCB</th><th class="num">Discount</th><th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in page_obj %}
+      <tr>
+        <td><a href="{% url 'policy_detail' p.pk %}">{{ p.policy_number }}</a></td>
+        <td>{{ p.policyholder.name }}</td>
+        <td>{{ p.get_plan_type_display }}</td>
+        <td class="num">{{ p.sum_insured|inr_compact }}</td>
+        <td class="num">{{ p.base_premium|inr }}</td>
+        <td class="num"><strong>{{ p.current_premium|inr }}</strong></td>
+        <td class="num">{{ p.no_claim_streak }}×</td>
+        <td class="num"><span class="badge {% if p.discount_pct_applied %}green{% else %}grey{% endif %}">{{ p.discount_pct_applied }}%</span></td>
+        <td><span class="badge {{ p.status|policy_badge }}">{{ p.get_status_display }}</span></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty">No policies yet. <a href="{% url 'policy_create' %}">Create the first one.</a></div>
+  {% endif %}
+</div>
+
+{% include 'insurance/_pagination.html' %}
+{% endblock %}

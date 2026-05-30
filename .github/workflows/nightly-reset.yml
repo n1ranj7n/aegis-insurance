@@ -1,0 +1,24 @@
+# Free nightly demo reset using GitHub Actions (alternative to a paid Render Cron Job).
+# Add a repository secret named DATABASE_URL (your Neon connection string).
+name: Nightly demo reset
+
+on:
+  schedule:
+    - cron: "30 18 * * *" # 00:00 IST (18:30 UTC) daily
+  workflow_dispatch: {} # allow manual runs from the Actions tab
+
+jobs:
+  reset:
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      SECRET_KEY: ci-only-not-secret
+      DEBUG: "False"
+      ALLOWED_HOSTS: localhost
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12.4"
+      - run: pip install -r requirements.txt
+      - run: python manage.py reset_demo

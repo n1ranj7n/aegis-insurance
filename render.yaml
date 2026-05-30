@@ -1,0 +1,39 @@
+# Render Blueprint. In the Render dashboard: New + → "Blueprint" → point at this repo.
+# DATABASE_URL and ALLOWED_HOSTS are set manually (sync:false) — paste your Neon URL
+# and the onrender.com hostname after the first deploy.
+
+services:
+  - type: web
+    name: aegis-insurance
+    runtime: python
+    plan: free
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn config.wsgi"
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.4"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      - key: DATABASE_URL
+        sync: false
+      - key: ALLOWED_HOSTS
+        sync: false
+      - key: DEMO_ROW_LIMIT
+        value: "200"
+      - key: DEMO_WRITE_RATE
+        value: "30/m"
+
+  # Nightly reset. NOTE: Render Cron Jobs require a paid instance type.
+  # A free alternative (GitHub Actions) is provided in .github/workflows/nightly-reset.yml.
+  - type: cron
+    name: aegis-nightly-reset
+    runtime: python
+    plan: starter
+    schedule: "30 18 * * *" # 00:00 IST (18:30 UTC) every day
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "python manage.py reset_demo"
+    envVars:
+      - key: DATABASE_URL
+        sync: false

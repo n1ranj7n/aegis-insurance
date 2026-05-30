@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% load insurance_extras %}
+{% block title %}Claims · Aegis{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Claims</h1>
+    <div class="sub">{{ page_obj.paginator.count }} claim{{ page_obj.paginator.count|pluralize }}{% if active_status %} · filtered{% endif %}</div>
+  </div>
+  <a href="{% url 'claim_create' %}" class="btn btn-primary">+ Record claim</a>
+</div>
+
+<div class="btn-row" style="margin-bottom:16px">
+  <a href="{% url 'claim_list' %}" class="btn btn-sm {% if not active_status %}btn-blue{% else %}btn-ghost{% endif %}">All</a>
+  {% for value, label in statuses %}
+    <a href="?status={{ value }}" class="btn btn-sm {% if active_status == value %}btn-blue{% else %}btn-ghost{% endif %}">{{ label }}</a>
+  {% endfor %}
+</div>
+
+<div class="card">
+  {% if page_obj %}
+  <table class="data">
+    <thead>
+      <tr><th>Claim</th><th>Policy</th><th>Holder</th><th>Type</th><th class="num">Amount</th><th>Service date</th><th>Status</th><th>Actions</th></tr>
+    </thead>
+    <tbody>
+      {% for c in page_obj %}
+      <tr>
+        <td>{{ c.claim_number }}</td>
+        <td><a href="{% url 'policy_detail' c.policy.pk %}">{{ c.policy.policy_number }}</a></td>
+        <td>{{ c.policy.policyholder.name }}</td>
+        <td>{{ c.get_claim_type_display }}</td>
+        <td class="num">{{ c.claim_amount|inr }}</td>
+        <td>{{ c.date_of_service|date:"d M Y" }}</td>
+        <td><span class="badge {{ c.status|claim_badge }}">{{ c.get_status_display }}</span></td>
+        <td>
+          <div class="btn-row">
+            {% if c.status == 'submitted' %}
+              <form method="post" action="{% url 'claim_set_status' c.pk 'approved' %}" style="margin:0">{% csrf_token %}<button class="btn btn-green btn-sm">Approve</button></form>
+              <form method="post" action="{% url 'claim_set_status' c.pk 'rejected' %}" style="margin:0">{% csrf_token %}<button class="btn btn-red btn-sm">Reject</button></form>
+            {% elif c.status == 'approved' %}
+              <form method="post" action="{% url 'claim_set_status' c.pk 'settled' %}" style="margin:0">{% csrf_token %}<button class="btn btn-blue btn-sm">Settle</button></form>
+            {% endif %}
+            <a href="{% url 'claim_edit' c.pk %}" class="btn btn-ghost btn-sm">Edit</a>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty">No claims found. <a href="{% url 'claim_create' %}">Record one.</a></div>
+  {% endif %}
+</div>
+
+{% include 'insurance/_pagination.html' %}
+{% endblock %}

@@ -1,0 +1,19 @@
+# Aegis Health Insurance — pinned dependencies (Python 3.12).
+# Direct dependencies are grouped first; transitive pins follow for reproducibility.
+
+# --- Direct ---
+Django==5.2.14
+dj-database-url==3.1.2          # DATABASE_URL -> Django DB config
+psycopg[binary]==3.3.4          # PostgreSQL driver (psycopg 3)
+python-dotenv==1.2.2            # load local .env
+gunicorn==26.0.0               # production WSGI server
+whitenoise==6.12.0             # static file serving without a CDN
+django-ratelimit==4.1.0        # per-IP write throttling
+
+# --- Transitive (pinned) ---
+asgiref==3.11.1
+packaging==26.2
+psycopg-binary==3.3.4
+sqlparse==0.5.5
+typing_extensions==4.15.0
+tzdata==2026.2

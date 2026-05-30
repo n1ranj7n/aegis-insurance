@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}Add policy · Aegis{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Add policy</h1>
+    <div class="sub"><a href="{% url 'policy_list' %}">Policies</a> / New</div>
+  </div>
+</div>
+
+{% if at_capacity %}
+  <div class="msg warning" style="margin-bottom:16px">
+    Demo limit reached ({{ used }}/{{ limit }} policies). New records are paused — data resets nightly.
+  </div>
+{% endif %}
+
+<div class="card card-pad" style="max-width:760px">
+  <p class="pill-meta" style="margin-top:0">
+    New policies start at the base premium with a clean No-Claim-Bonus slate. Use
+    <strong>Run renewal</strong> on the policy page to apply NCB discounts.
+  </p>
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {% include 'insurance/_formfields.html' %}
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary" {% if at_capacity %}disabled{% endif %}>Save policy</button>
+      <a href="{% url 'policy_list' %}" class="btn btn-ghost">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

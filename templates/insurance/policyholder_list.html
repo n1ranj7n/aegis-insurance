@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% load insurance_extras %}
+{% block title %}Policyholders · Aegis{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Policyholders</h1>
+    <div class="sub">{{ page_obj.paginator.count }} registered customer{{ page_obj.paginator.count|pluralize }}</div>
+  </div>
+  <a href="{% url 'policyholder_create' %}" class="btn btn-primary">+ Add policyholder</a>
+</div>
+
+<div class="card">
+  {% if page_obj %}
+  <table class="data">
+    <thead>
+      <tr><th>Name</th><th>Email</th><th>Gender</th><th class="num">Age</th><th>Phone</th><th class="num">Policies</th></tr>
+    </thead>
+    <tbody>
+      {% for h in page_obj %}
+      <tr>
+        <td><a href="{% url 'policyholder_detail' h.pk %}">{{ h.name }}</a></td>
+        <td>{{ h.email }}</td>
+        <td>{{ h.get_gender_display }}</td>
+        <td class="num">{{ h.age }}</td>
+        <td>{{ h.phone }}</td>
+        <td class="num">{{ h.policy_count }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty">No policyholders yet. <a href="{% url 'policyholder_create' %}">Add the first one.</a></div>
+  {% endif %}
+</div>
+
+{% include 'insurance/_pagination.html' %}
+{% endblock %}
