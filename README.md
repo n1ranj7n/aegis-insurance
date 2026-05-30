@@ -13,6 +13,8 @@ rate limiting, and input validation.
 - **Config:** 100% environment-driven (`.env` locally, real env vars in prod)
 - **Deploy:** Render / Railway — no extra infrastructure required
 
+**Author:** Niranjan Subash · [github.com/n1ranj7n](https://github.com/n1ranj7n) · Repo: [n1ranj7n/aegis-insurance](https://github.com/n1ranj7n/aegis-insurance)
+
 ---
 
 ## Table of contents
@@ -66,6 +68,10 @@ seed/reset commands. They can be changed via `DEMO_USERNAME` / `DEMO_PASSWORD`.
 database works perfectly).
 
 ```bash
+# 0. Clone the repository
+git clone https://github.com/n1ranj7n/aegis-insurance.git
+cd aegis-insurance
+
 # 1. Create and activate a virtual environment
 python -m venv venv
 # Windows (PowerShell):
@@ -280,3 +286,13 @@ aegis-insurance/
 
 For the reasoning behind the premium engine and the demo-safety design, read
 [ARCHITECTURE.md](ARCHITECTURE.md).
+
+---
+
+## Author
+
+**Niranjan Subash** — [github.com/n1ranj7n](https://github.com/n1ranj7n)
+
+Built as a portfolio project to demonstrate production-shaped Django: a clean
+domain model, a non-trivial business rule (the No-Claim-Bonus premium engine),
+and the operational concerns of running a demo on the public internet.
