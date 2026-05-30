@@ -97,7 +97,7 @@ python manage.py seed_demo
 python manage.py runserver
 ```
 
-Open <http://127.0.0.1:8000/> and sign in with the demo credentials above.
+Open <http://localhost:8000/> and sign in with the demo credentials above.
 
 > On Windows, if `Activate.ps1` is blocked, run
 > `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass` first, or just call
