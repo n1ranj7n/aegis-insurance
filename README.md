@@ -16,7 +16,14 @@ rate limiting, and input validation.
 **Author:** Niranjan Subash · [github.com/n1ranj7n](https://github.com/n1ranj7n) · Repo: [n1ranj7n/aegis-insurance](https://github.com/n1ranj7n/aegis-insurance)
 
 ---
+# Aegis Insurance — Health Insurance Management Platform
 
+**Live demo:** https://aegis-insurance.onrender.com
+**Demo login:** username `demo` · password `demo1234`
+
+> Demo environment — data resets nightly. First load may take ~50s (free-tier cold start).
+
+---
 ## Table of contents
 
 - [Features](#features)
